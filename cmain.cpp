@@ -188,6 +188,7 @@ void foo()
     }
 }
 
+
 int main()
 {
     GoldenFoo();
