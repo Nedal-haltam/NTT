@@ -2,13 +2,13 @@
 #include <algorithm>
 #include <vector>
 #include <complex>
+#define _USE_MATH_DEFINES
 #include <math.h>
 #include <assert.h>
 #include <time.h>
 #include <iomanip>
 
 using namespace std;
-const double PI = acos(-1);
 
 const int mod = 998244353; // A commonly used NTT-friendly prime
 const int root = 3;        // Primitive root modulo mod
@@ -42,16 +42,16 @@ void ntt(vector<int>& a, bool invert, bool other) {
     if (other)
     {
         for (int i = 1; i <= (int)log2(n); i++) {
-            int lencopy = (int)pow(2, i);
-            int wlen = mod_pow(root, (mod - 1) / lencopy, mod);
+            int len = 1 << i;
+            int wlen = mod_pow(root, (mod - 1) / len, mod);
             if (invert) wlen = mod_pow(wlen, mod - 2, mod);
-            for (int j = 0; j < n / lencopy; j++) {
+            for (int j = 0; j < n / len; j++) {
                 int w = 1;
-                for (int k = 0; k < lencopy / 2; k++) {
-                    int u = a[(j * lencopy) + k];
-                    int v = (1LL * a[(j * lencopy)+ k + lencopy / 2] * w) % mod;
-                    a[(j * lencopy)+ k] = (u + v) % mod;
-                    a[(j * lencopy)+ k + lencopy / 2] = (u - v + mod) % mod;
+                for (int k = 0; k < len / 2; k++) {
+                    int u = a[(j * len) + k];
+                    int v = (1LL * a[(j * len)+ k + len / 2] * w) % mod;
+                    a[(j * len)+ k] = (u + v) % mod;
+                    a[(j * len)+ k + len / 2] = (u - v + mod) % mod;
                     w = (1LL * w * wlen) % mod;
                 }
             }
@@ -81,7 +81,7 @@ void ntt(vector<int>& a, bool invert, bool other) {
     }
 }
 
-void fft(vector<complex<double>>& a, bool invert) {
+void fft(vector<complex<double>>& a, bool invert, bool other) {
     int n = a.size();
     int sign = invert ? -1 : 1;
     // Bit-reversal permutation
@@ -96,21 +96,42 @@ void fft(vector<complex<double>>& a, bool invert) {
         }
     }
 
-    // Cooley�Tukey FFT
-    for (int len = 2; len <= n; len <<= 1) {
-        double angle = sign * 2 * PI / len;
-        complex<double> wlen(cos(angle), sin(angle));
-        for (int i = 0; i < n; i += len) {
-            complex<double> w(1);
-            for (int j = 0; j < len / 2; ++j) {
-                complex<double> u = a[i + j];
-                complex<double> v = a[i + j + len / 2] * w;
-                a[i + j] = u + v;
-                a[i + j + len / 2] = u - v;
-                w *= wlen;
+    if (other)
+    {
+        for (int i = 1; i <= (int)log2(n); i++) {
+            int len = 1 << i;
+            double angle = sign * 2 * M_PI / len;
+            complex<double> wlen(cos(angle), sin(angle));
+            for (int j = 0; j < n / len; j++) {
+                complex<double> w(1);
+                for (int k = 0; k < len / 2; k++) {
+                    complex<double> u = a[(j * len) + k];
+                    complex<double> v = a[(j * len) + k + len / 2] * w;
+                    a[(j * len) + k] = u + v;
+                    a[(j * len) + k + len / 2] = u - v;
+                    w *= wlen;
+                }
             }
         }
     }
+    else
+    {
+        // Cooley�Tukey FFT
+        for (int len = 2; len <= n; len <<= 1) {
+            double angle = sign * 2 * M_PI / len;
+            complex<double> wlen(cos(angle), sin(angle));
+            for (int i = 0; i < n; i += len) {
+                complex<double> w(1);
+                for (int j = 0; j < len / 2; ++j) {
+                    complex<double> u = a[i + j];
+                    complex<double> v = a[i + j + len / 2] * w;
+                    a[i + j] = u + v;
+                    a[i + j + len / 2] = u - v;
+                    w *= wlen;
+                }
+            }
+        }
+}
 
     // Normalize if inverse
     if (invert) {
@@ -119,7 +140,7 @@ void fft(vector<complex<double>>& a, bool invert) {
     }
 }
 
-vector<complex<double>> FFTMultiply(const vector<complex<double>>& a, const vector<complex<double>>& b) {
+vector<complex<double>> FFTMultiply(const vector<complex<double>>& a, const vector<complex<double>>& b, bool other) {
     vector<complex<double>> fa(a.begin(), a.end()), fb(b.begin(), b.end());
     int n = 1;
     while (n < a.size() + b.size())
@@ -127,11 +148,11 @@ vector<complex<double>> FFTMultiply(const vector<complex<double>>& a, const vect
     fa.resize(n);
     fb.resize(n);
 
-    fft(fa, false);
-    fft(fb, false);
+    fft(fa, false, other);
+    fft(fb, false, other);
     for (int i = 0; i < n; ++i)
         fa[i] *= fb[i];
-    fft(fa, true);
+    fft(fa, true, other);
 
     return fa;
 }
@@ -152,7 +173,7 @@ vector<int> NTTMultiply(vector<int> const& a, vector<int> const& b, bool other) 
     return fa;
 }
 
-vector<int> Multiply(vector<int> const& a, vector<int> const& b)
+vector<int> NaiveMultiply(vector<int> const& a, vector<int> const& b)
 {
     int n = a.size();
     int m = b.size();
@@ -174,10 +195,11 @@ void DisplayVector(vector<T> vec)
     cout << endl;
 }
 
-void FillVectorRandom(vector<int>& vec, int a, int b)
+template<class T>
+void FillVectorRandom(vector<T>& vec, T a, T b, T (*GetRandomT)(T, T))
 {
     for(int i = 0; i < vec.size(); i++)
-        vec[i] = a + (rand() % (b - a + 1));
+        vec[i] = GetRandomT(a, b);
 }
 
 template<class T>
@@ -206,27 +228,62 @@ void EvaluateClock(string Message)
     cout << Message << "\n";
     cout << std::fixed << std::setprecision(3) << "Time taken: " << (double)(t) / CLOCKS_PER_SEC << "s\n";
 }
+
+int GetRandomInt(int a, int b)
+{
+    return a + (rand() % (b - a + 1));
+}
+
+complex<double> GetRandomComplex(complex<double> a, complex<double> b)
+{
+    complex<double> t(b - a + complex<double>(1, 1));
+    return complex<double>(a.real() + rand() % (int)t.real(), a.imag() + rand() % (int)t.imag());
+}
+
+void NTTMultiplyBenchMark(int n)
+{
+    int lower(1);
+    int upper(5);
+    auto RadomFunction = GetRandomInt;
+    vector<int> a(n);
+    FillVectorRandom(a, lower, upper, RadomFunction);
+    vector<int> b(n);
+    FillVectorRandom(b, lower, upper, RadomFunction);
+    
+    StartClock();
+    vector<int> c = NTTMultiply(a, b, true);
+    EvaluateClock("");
+    
+    DisplayVector(a);
+    DisplayVector(b);
+    DisplayVector(c);
+}
+
+void FFTMultiplyBenchMark(int n)
+{
+    complex<double>lower(1, 0);
+    complex<double>upper(5, 0);
+    auto RadomFunction = GetRandomComplex;
+    vector<complex<double>> a(n);
+    FillVectorRandom(a, lower, upper, RadomFunction);
+    vector<complex<double>> b(n);
+    FillVectorRandom(b, lower, upper, RadomFunction);
+
+    StartClock();
+    vector<complex<double>> c = FFTMultiply(a, b, true);
+    EvaluateClock("");
+    DisplayVector(a);
+    DisplayVector(b);
+    DisplayVector(c);
+}
+
 int main()
 {
-    int n = 10 * 1024 * 1024;
     srand(time(0));
-
-    vector<int> a(n);
-    FillVectorRandom(a, 1, 5);
-    vector<int> b(n);
-    FillVectorRandom(b, 1, 5);
-
-    vector<int> c;
-
-    StartClock();
-        c = NTTMultiply(a, b, false);
-    EvaluateClock("the origianl");
-
-    c.clear();
-
-    StartClock();
-        c = NTTMultiply(a, b, true);
-    EvaluateClock("the new one with indexing");
+    int n = 3;
+    NTTMultiplyBenchMark(n);
+    cout << "------------------------------------------------------------------------------------------------------------------------------------\n";
+    FFTMultiplyBenchMark(n);
 
     return 0;
 }
