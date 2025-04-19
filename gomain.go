@@ -168,11 +168,11 @@ func Multiply(a, b []int) []int {
 }
 
 func main() {
-	n := 10 * 1024 * 1024
+	n := 2
 	a := make([]int, n)
 	b := make([]int, n)
 
-	rand := rand.New(rand.NewPCG(42, 1024))
+	rand := rand.New(rand.NewPCG(uint64(time.Time.Nanosecond(time.Now())), uint64(time.Time.Nanosecond(time.Now()))))
 
 	for i := 0; i < n; i++ {
 		a[i] = 1 + rand.IntN(5)
@@ -188,17 +188,16 @@ func main() {
 
 	fmt.Println("done")
 	fmt.Printf("Time taken: %.2fs\n", time.Since(start).Seconds())
-	// for i := range a {
-	// 	fmt.Print(a[i], " ")
-	// }
-	// fmt.Println()
-	// for i := range b {
-	// 	fmt.Print(b[i], " ")
-	// }
-	// fmt.Println()
-	// for i := range c {
-	// 	fmt.Print(c[i], " ")
-	// }
-	// fmt.Println()
-	_ = c // to prevent "declared and not used" error if unused
+	for i := range a {
+		fmt.Print(a[i], " ")
+	}
+	fmt.Println()
+	for i := range b {
+		fmt.Print(b[i], " ")
+	}
+	fmt.Println()
+	for i := range c {
+		fmt.Print(c[i], " ")
+	}
+	fmt.Println()
 }
