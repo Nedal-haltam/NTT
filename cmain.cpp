@@ -10,13 +10,18 @@
 
 using namespace std;
 
-const int mod = 998244353; // A commonly used NTT-friendly prime
-const int root = 3;        // Primitive root modulo mod
-int mod_pow(int base, int exp, int m) {
+// const int MOD = 998244353; // A commonly used NTT-friendly prime
+// const int ROOT = 3;        // Primitive root modulo mod
+const int MOD = 7681; // A commonly used NTT-friendly prime
+const int ROOT = 3383;        // Primitive root modulo mod
+
+int mod_pow(int base, int exp, int mod) {
     int result = 1;
+    base %= mod;
     while (exp > 0) {
-        if (exp & 1) result = (1LL * result * base) % m;
-        base = (1LL * base * base) % m;
+        if (exp & 1)
+        result = (1LL * result * base) % mod;
+        base = (1LL * base * base) % mod;
         exp >>= 1;
     }
     return result;
@@ -24,9 +29,9 @@ int mod_pow(int base, int exp, int m) {
 
 void ntt(vector<int>& a, bool invert, bool other) {
     int n = a.size();
-    int root_pw = mod_pow(root, (mod - 1) / n, mod);
-    if (invert) root_pw = mod_pow(root_pw, mod - 2, mod); // inverse root
-
+    // int root_pw = mod_pow(ROOT, (MOD - 1) / n, MOD);
+    // if (invert) root_pw = mod_pow(root_pw, MOD - 2, MOD); // inverse root
+    int root = (invert) ? mod_pow(ROOT, MOD - 2, MOD) : ROOT;
     // Bit-reversal permutation
     for (int i = 1, j = 0; i < n; ++i) {
         int bit = n >> 1;
@@ -43,16 +48,16 @@ void ntt(vector<int>& a, bool invert, bool other) {
     {
         for (int i = 1; i <= (int)log2(n); i++) {
             int len = 1 << i;
-            int wlen = mod_pow(root, (mod - 1) / len, mod);
-            if (invert) wlen = mod_pow(wlen, mod - 2, mod);
+            int wlen = mod_pow(root, (MOD - 1) / len, MOD);
+            if (invert) wlen = mod_pow(wlen, MOD - 2, MOD);
             for (int j = 0; j < n / len; j++) {
                 int w = 1;
                 for (int k = 0; k < len / 2; k++) {
                     int u = a[(j * len) + k];
-                    int v = (1LL * a[(j * len)+ k + len / 2] * w) % mod;
-                    a[(j * len)+ k] = (u + v) % mod;
-                    a[(j * len)+ k + len / 2] = (u - v + mod) % mod;
-                    w = (1LL * w * wlen) % mod;
+                    int v = (1LL * a[(j * len)+ k + len / 2] * w) % MOD;
+                    a[(j * len)+ k] = (u + v) % MOD;
+                    a[(j * len)+ k + len / 2] = (u - v + MOD) % MOD;
+                    w = (1LL * w * wlen) % MOD;
                 }
             }
         }
@@ -60,24 +65,24 @@ void ntt(vector<int>& a, bool invert, bool other) {
     else
     {
         for (int len = 2; len <= n; len <<= 1) {
-            int wlen = mod_pow(root, (mod - 1) / len, mod);
-            if (invert) wlen = mod_pow(wlen, mod - 2, mod);
+            int wlen = mod_pow(root, (MOD - 1) / len, MOD);
+            if (invert) wlen = mod_pow(wlen, MOD - 2, MOD);
             for (int i = 0; i < n; i += len) {
                 int w = 1;
                 for (int j = 0; j < len / 2; ++j) {
                     int u = a[i + j];
-                    int v = (1LL * a[i + j + len / 2] * w) % mod;
-                    a[i + j] = (u + v) % mod;
-                    a[i + j + len / 2] = (u - v + mod) % mod;
-                    w = (1LL * w * wlen) % mod;
+                    int v = (1LL * a[i + j + len / 2] * w) % MOD;
+                    a[i + j] = (u + v) % MOD;
+                    a[i + j + len / 2] = (u - v + MOD) % MOD;
+                    w = (1LL * w * wlen) % MOD;
                 }
             }
         }
     }
 
     if (invert) {
-        int n_inv = mod_pow(n, mod - 2, mod);
-        for (int& x : a) x = (1LL * x * n_inv) % mod;
+        int n_inv = mod_pow(n, MOD - 2, MOD);
+        for (int& x : a) x = (1LL * x * n_inv) % MOD;
     }
 }
 
@@ -167,7 +172,7 @@ vector<int> NTTMultiply(vector<int> const& a, vector<int> const& b, bool other) 
     ntt(fa, false, other);
     ntt(fb, false, other);
     for (int i = 0; i < n; i++)
-        fa[i] = (1LL * fa[i] * fb[i]) % mod;
+        fa[i] = (1LL * fa[i] * fb[i]) % MOD;
     ntt(fa, true, other);
 
     return fa;
@@ -277,13 +282,45 @@ void FFTMultiplyBenchMark(int n)
     DisplayVector(c);
 }
 
+vector<int> ntt_naive(const vector<int>& a, bool invert = false) {
+    int n = a.size();
+    vector<int> A(n, 0);
+    int sign = (invert) ? -1 : 1;
+    int root = (invert) ? mod_pow(ROOT, MOD - 2, MOD) : ROOT;
+    for (int k = 0; k < n; ++k) {
+        for (int j = 0; j < n; ++j) {
+            int power = (1LL * j * k) % n;
+            int omega = mod_pow(root, power, MOD);
+            A[k] = (A[k] + a[j] * omega % MOD) % MOD;
+        }
+    }
+    if (invert)
+    {
+        int n_inv = mod_pow(n, MOD - 2, MOD);
+        for (int i = 0; i < A.size(); i++)
+        {
+            A[i] = (A[i] * n_inv) % MOD;    
+        }
+    }
+    return A;
+}
+
 int main()
 {
     srand(time(0));
-    int n = 3;
-    NTTMultiplyBenchMark(n);
-    cout << "------------------------------------------------------------------------------------------------------------------------------------\n";
-    FFTMultiplyBenchMark(n);
-
+    int n = 4;
+    vector<int> a = {1, 2, 3, 4};
+    // FillVectorRandom(a, 1, 5, GetRandomInt);
+    vector<int> acopy(a);   
+    DisplayVector(a);
+    cout << "--------------------------------------------------------------------------------\n";
+    ntt(a, false, false);
+    DisplayVector(a);
+    cout << "--------------------------------------------------------------------------------\n";
+    vector<int> c = ntt_naive(acopy);
+    DisplayVector(c);
+    
+    // NTTMultiplyBenchMark(n);
+    // FFTMultiplyBenchMark(n);
     return 0;
 }
