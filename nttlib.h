@@ -15,14 +15,14 @@ int mod_pow(int base, int exp, int mod) {
     base %= mod;
     while (exp > 0) {
         if (exp & 1)
-        result = (1LL * result * base) % mod;
+            result = (1LL * result * base) % mod;
         base = (1LL * base * base) % mod;
         exp >>= 1;
     }
     return result;
 }
 
-void ntt(vector<int>& a, bool invert, bool other, int root, int mod) {
+void ntt(vector<int>& a, bool invert, int root, int mod) {
     int n = a.size();
     for (int i = 1, j = 0; i < n; ++i) {
         int bit = n >> 1;
@@ -30,47 +30,27 @@ void ntt(vector<int>& a, bool invert, bool other, int root, int mod) {
             j ^= bit;
         j ^= bit;
         if (i < j)
-        {
             swap(a[i], a[j]);
-            //cout << i << " " << j << endl;
-        }
     }
-    if (other)
-    {
-        for (int i = 1; i <= (int)log2(n); i++) {
-            int len = 1 << i;
-            int wlen = root;
-            if (invert) wlen = mod_pow(wlen, mod - 2, mod);
-            for (int j = 0; j < n / len; j++) {
-                int w = 1;
-                for (int k = 0; k < len / 2; k++) {
-                    int u = a[(j * len) + k];
-                    int v = (1LL * a[(j * len)+ k + len / 2] * w) % mod;
-                    a[(j * len)+ k] = (u + v) % mod;
-                    a[(j * len)+ k + len / 2] = (u - v + mod) % mod;
-                    w = (1LL * w * wlen) % mod;
-                }
+    for (int i = 1; i <= (int)log2(n); i++) {
+        int len = 1 << i;
+        int wlen = root;//mod_pow(root, (mod - 1) / len, mod);
+        if (invert) wlen = mod_pow(wlen, mod - 2, mod);
+        for (int j = 0; j < n / len; j++) {
+            int w = 1;
+            for (int k = 0; k < len / 2; k++) {
+                int u = a[(j * len) + k];
+                int v = (1LL * a[(j * len)+ k + len / 2] * w) % mod;
+                a[(j * len)+ k] = (u + v) % mod;
+                a[(j * len)+ k + len / 2] = (u - v + mod) % mod;
+                w = (1LL * w * wlen) % mod;
             }
         }
     }
-    else
+    for (int i = 1; i < n / 2; i++)
     {
-        for (int len = 2; len <= n; len <<= 1) {
-            int wlen = root;
-            if (invert) wlen = mod_pow(wlen, mod - 2, mod);
-            for (int i = 0; i < n; i += len) {
-                int w = 1;
-                for (int j = 0; j < len / 2; ++j) {
-                    int u = a[i + j];
-                    int v = (1LL * a[i + j + len / 2] * w) % mod;
-                    a[i + j] = (u + v) % mod;
-                    a[i + j + len / 2] = (u - v + mod) % mod;
-                    w = (1LL * w * wlen) % mod;
-                }
-            }
-        }
+        swap(a[i], a[n - i]);
     }
-
     if (invert) {
         int n_inv = mod_pow(n, mod - 2, mod);
         for (int& x : a) x = (1LL * x * n_inv) % mod;
@@ -114,7 +94,6 @@ void fft(vector<complex<double>>& a, bool invert, bool other) {
     }
     else
     {
-        // Cooley�Tukey FFT
         for (int len = 2; len <= n; len <<= 1) {
             double angle = sign * 2 * M_PI / len;
             complex<double> wlen(cos(angle), sin(angle));
@@ -129,9 +108,7 @@ void fft(vector<complex<double>>& a, bool invert, bool other) {
                 }
             }
         }
-}
-
-    // Normalize if inverse
+    }
     if (invert) {
         for (complex<double>& x : a)
             x /= n;
@@ -162,11 +139,11 @@ vector<int> NTTMultiply(vector<int> const& a, vector<int> const& b, bool other, 
     fa.resize(n);
     fb.resize(n);
 
-    ntt(fa, false, other, root, mod);
-    ntt(fb, false, other, root, mod);
+    ntt(fa, false, root, mod);
+    ntt(fb, false, root, mod);
     for (int i = 0; i < n; i++)
         fa[i] = (1LL * fa[i] * fb[i]) % mod;
-    ntt(fa, true, other, root, mod);
+    ntt(fa, true, root, mod);
 
     return fa;
 }
