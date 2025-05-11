@@ -43,7 +43,7 @@ void FillVectorRandom(vector<T>& vec, T a, T b, T (*GetRandomT)(T, T))
 }
 
 template<class T>
-void CompareVectors(vector<T>& c, vector<T>& cother)
+bool CompareVectors(vector<T>& c, vector<T>& cother)
 {
     assert(c.size() == cother.size());
     for (int i = 0; i < c.size(); i++)
@@ -51,9 +51,10 @@ void CompareVectors(vector<T>& c, vector<T>& cother)
         if (c[i] != cother[i])
         {
             cout << "difference found\n";
-            exit(EXIT_FAILURE);
+            return false;
         }
     }
+    return true;
 }
 
 
@@ -81,10 +82,29 @@ complex<double> GetRandomComplex(complex<double> a, complex<double> b)
 }
 
 
-vector<int> ntt_naive(vector<int>& a, int root, int mod, bool invert = false) {
+void bit_reverse_permutation(std::vector<int>& data) {
+    int n = data.size();
+    int bits = std::log2(n);
+    
+    for (int i = 0; i < n; ++i) {
+        int rev = 0;
+        int x = i;
+        for (int j = 0; j < bits; ++j) {
+            rev = (rev << 1) | (x & 1);
+            x >>= 1;
+        }
+        if (i < rev) {
+            std::swap(data[i], data[rev]);
+        }
+    }
+}
+
+vector<int> ntt_naive(vector<int>& a, int pr, int mod, bool invert = false) {
     int n = a.size();
     vector<int> A(n, 0);
-    root = (invert) ? mod_pow(root, mod - 2, mod) : root;
+    int root = mod_pow(pr, (mod - 1) / n, mod);
+    if (invert)
+        root = mod_pow(root, mod - 2, mod);
     for (int k = 0; k < n; ++k) {
         for (int j = 0; j < n; ++j) {
             int power = ((1LL * j * k) % n);
@@ -122,14 +142,16 @@ vector<int> NTTMultiplynaive(vector<int>& a, vector<int>& b, int root, int mod)
 int main()
 {
     srand(time(0));
-    vector<int> p1 = {1, 2, 3, 4};
-    vector<int> p2 = {1, 2, 3, 4};
-
-    int mod = 3278753;
-    int root = 449739;
-
-    vector<int> c = NTTMultiplynaive(p1, p2, root, mod);
-    DisplayVector(c);
+    vector<int> a = {1, 2, 3, 4, 5, 6, 7, 8};
+    int p = 21265553;
+    int pr = 3;
+    vector<int> ntt = ntt_naive(a, pr, p);
+    vector<int> intt = ntt_naive(ntt, pr, p, true);
+    cout << "The prime number is : " << p << "\n";
+    cout << "The primitive root is : " << pr << "\n";
+    DisplayVector(a);
+    DisplayVector(ntt);
+    DisplayVector(intt);
 
     return 0;
 }

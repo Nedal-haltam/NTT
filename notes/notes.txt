@@ -1,0 +1,24 @@
+
+step to run the python script and cmain.cpp:
+    1- python script:
+        1.1- specify n
+        1.2- specify a prime number
+        1.3- generate the valid primitive n-th roots of unity
+        1.4- if no valid primitive n-th root of unity go to step (1.2)
+        1.5- get the primitive root of the specified prime number
+        1.6- at this point you have primitive root (pr) and a prime number (p)
+    2- cmain.cpp
+        1- fill the parameters you got from step (1)
+        2- run
+
+NTT Applications:
+    - encryption: polynomial multiplication
+    - 1D convolution
+
+Trace SW Code: 
+    - it is a normal summation: 
+        1- see the Propsal
+        2- see the `ntt_naive` function
+
+Compare out Systolic with the literature:
+    - continue the methodology in the propsal for one of the designs to compare with the literature

@@ -1,0 +1,31 @@
+
+A Complete Beginner Guide to the Number Theoretic Transform (NTT)
+    - linK: https://eprint.iacr.org/2024/585.pdf
+    - this gives an introduction to the NTT algorithm and different approaches to implement
+
+Design of Novel Systolic Array based NTT for CRYSTALS-Kyber scheme
+    - link: https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=10808929&casa_token=EQQbUyg0zVwAAAAA:1I9DYICgBOPJ01sQUFFXke0W1sxvRsj85o8tq53EmgBolOtnV2QOUJ8G4th-mluWnQjhfI5afSXCtA&tag=1
+    - (~23 ns) for a 512-point NTT
+    - they implemented 1D-systolic array using Vivado synthesis tool
+    - The computational efficiency of a polynomial multiplier can be significantly improved to O(n) by modifying the systolic architecture to include a 
+    series of n multiply-accumulate units (MACs).
+
+Hardware Design of an n-coefficient NTT-Based Polynomial Multiplier
+    - linK: https://www.researchgate.net/publication/271205312_Hardware_Design_of_an_NTT-Based_Polynomial_Multiplier
+    - (4.35 ns) for a 512-point NTT
+    - implemented in pure verilog using quartus 2
+
+Exploring Energy Efficient Quantum-resistant Signal Processing Using Array Processors
+    - link: https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=9053653&casa_token=5TMBVn0dZ_MAAAAA:3oOdwsx1rtD5AdhwWKvLw1mJ11SOLw48Ux10QyvfyK7qstvTMaHxPAhodzq9NprmU6Kr2W3SO9A3fQ
+    - (10.75 us) To multiply two polynomials using NTT-based multipliers,we need to execute NTT block three times, and each includes bit-reversal, forward NTT, and point-wised multiplication of 
+    the input vector with the pre-computed twiddle factors
+    - they used Vivado high level synthesis (HLS) 2018.2 and select Artix7 and Zynq UltraScale+ as the target FPGA
+
+Optimizing Systolic Array-based NTT Accelerators
+    - linK: https://d197for5662m48.cloudfront.net/documents/publicationstatus/248660/preprint_pdf/92e991c886d74cfb0087585b44a3bde7.pdf
+    - they used Gemmini and ZigZag in their experiments and desgin space exploration
+
+Accelerating Polynomial Multiplication for RLWE using Pipelined FFT
+    - linK: https://eprint.iacr.org/2023/1815.pdf
+    - they implemented three approaches and used Vivado synthesis HLS tool
+

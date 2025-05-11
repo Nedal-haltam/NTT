@@ -1,36 +1,31 @@
 import sympy
 
-def GenerateNTT(n : int, index : int):
-    PrimeNumber = sympy.prime(index)
-    while not ((PrimeNumber - 1) % n == 0 and PrimeNumber % (2 * n) == 1):
-        index += 1
-        PrimeNumber = sympy.prime(index)
-    roots = sympy.nthroot_mod(1, n, PrimeNumber, all_roots=True)
-
-    finals = []
-    # print(roots)
-    for root in roots:
-        foo = True
-        for i in range(1, n, 1):
-            if root ** i % PrimeNumber == 1:
-                foo = False
-                break
-        if foo:
-            finals.append(root)
-
+def GenerateNTTFromPrime(n : int, PrimeNumber):
     print(f'The prime number is : {PrimeNumber}')
-    print(f'the possible nth roots of unity are {finals}')
-
-    # sequence  
-    seq = range(1, n + 1)
-    prime_no = PrimeNumber
-    # ntt 
-    transform = sympy.ntt(seq, prime_no) 
-    invtransform = sympy.intt(transform, prime_no)
-    print("NTT :",transform) 
-    # print ("inverse NTT :",invtransform) 
-    print('----------------------------------------------------------------------------------------------------------------')
+    print(f'The primitive root is : {sympy.primitive_root(PrimeNumber)}')
+    seq = list(range(1, n + 1))
+    # seq = [10, 913, 7679, 6764]
+    transform = sympy.ntt(seq, PrimeNumber)
+    print(seq)
+    print(transform) 
+    print (sympy.intt(transform, PrimeNumber)) 
 
 
-GenerateNTT(8, 235511)
+n = 8
+p = sympy.prime(1345654)
+GenerateNTTFromPrime(n, p)
 
+roots = sympy.nthroot_mod(1, n, p, all_roots=True)
+validroots = []
+for root in roots:
+    a = pow(root, n, p) == 1
+    b = True
+    for i in range(1, n):
+        if pow(root, i, p) == 1:
+            b = False
+            break
+    if a and b:
+        validroots.append(root)
+print('roots: ', roots)
+print('valid primitive n-th root of unity: ', validroots)
+print(sympy.primitive_root(p))
