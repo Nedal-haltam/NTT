@@ -11,8 +11,9 @@ def GenerateNTTFromPrime(n : int, PrimeNumber):
     print (sympy.intt(transform, PrimeNumber)) 
 
 
-n = 8
-p = sympy.prime(1345654)
+n = 16
+# p = sympy.prime(65421)
+p = 7681
 GenerateNTTFromPrime(n, p)
 
 roots = sympy.nthroot_mod(1, n, p, all_roots=True)
@@ -28,4 +29,3 @@ for root in roots:
         validroots.append(root)
 print('roots: ', roots)
 print('valid primitive n-th root of unity: ', validroots)
-print(sympy.primitive_root(p))

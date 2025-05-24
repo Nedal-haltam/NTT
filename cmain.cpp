@@ -27,7 +27,7 @@ template<class T>
 void DisplayVector(vector<T> vec)
 {
     cout << "[";
-    for (int i = 0; i < vec.size() - 1; i++)
+    for (size_t i = 0; i < vec.size() - 1; i++)
     {
         cout << vec[i] << ", ";
     }
@@ -38,7 +38,7 @@ void DisplayVector(vector<T> vec)
 template<class T>
 void FillVectorRandom(vector<T>& vec, T a, T b, T (*GetRandomT)(T, T))
 {
-    for(int i = 0; i < vec.size(); i++)
+    for(size_t i = 0; i < vec.size(); i++)
         vec[i] = GetRandomT(a, b);
 }
 
@@ -46,7 +46,7 @@ template<class T>
 bool CompareVectors(vector<T>& c, vector<T>& cother)
 {
     assert(c.size() == cother.size());
-    for (int i = 0; i < c.size(); i++)
+    for (size_t i = 0; i < c.size(); i++)
     {
         if (c[i] != cother[i])
         {
@@ -115,7 +115,7 @@ vector<int> ntt_naive(vector<int>& a, int pr, int mod, bool invert = false) {
     if (invert)
     {
         int n_inv = mod_pow(n, mod - 2, mod);
-        for (int i = 0; i < A.size(); i++)
+        for (size_t i = 0; i < A.size(); i++)
         {
             A[i] = (1LL * A[i] * n_inv) % mod;    
         }
@@ -126,13 +126,13 @@ vector<int> ntt_naive(vector<int>& a, int pr, int mod, bool invert = false) {
 vector<int> NTTMultiplynaive(vector<int>& a, vector<int>& b, int root, int mod)
 {
     vector<int> fa(a), fb(b);
-    int n = 1;
+    size_t n = 1;
     while (n < a.size() + b.size()) n <<= 1;
     fa.resize(n);
     fb.resize(n);
     fa = ntt_naive(fa, root, mod, false);
     fb = ntt_naive(fb, root, mod, false);
-    for (int i = 0; i < n; i++)
+    for (size_t i = 0; i < n; i++)
     {
         fa[i] = (1LL * fa[i] * fb[i]) % mod;
     }
@@ -142,9 +142,12 @@ vector<int> NTTMultiplynaive(vector<int>& a, vector<int>& b, int root, int mod)
 int main()
 {
     srand(time(0));
-    vector<int> a = {1, 2, 3, 4, 5, 6, 7, 8};
-    int p = 21265553;
-    int pr = 3;
+    vector<int> a = vector<int>();
+    int n = 16;
+    int p = 7681;
+    int pr = 17;
+    for (int i = 0; i < n; i++)
+        a.push_back(i+1);
     vector<int> ntt = ntt_naive(a, pr, p);
     vector<int> intt = ntt_naive(ntt, pr, p, true);
     cout << "The prime number is : " << p << "\n";
