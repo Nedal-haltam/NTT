@@ -139,8 +139,41 @@ vector<int> NTTMultiplynaive(vector<int>& a, vector<int>& b, int root, int mod)
     return ntt_naive(fa, root, mod, true);
 }
 
+void NTTPolynomialMult()
+{
+    int p = 7681;
+    int pr = 17;
+    vector<int> a = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    vector<int> b = { 1, 2, 3, 4, 5};
+    cout << "The prime number is : " << p << "\n";
+    cout << "The primitive root is : " << pr << "\n";
+    DisplayVector(a);
+    DisplayVector(b);
+    vector<int> c = NTTMultiplynaive(a, b, pr, p);
+    cout << "The result of polynomial multiplication is : \n";
+    DisplayVector(c);
+}
+
+void NaivePolynomialMult()
+{
+    vector<int> a = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    vector<int> b = { 1, 2, 3, 4, 5};
+    vector<int> c(a.size() + b.size() - 1, 0);
+    for (size_t i = 0; i < a.size(); i++)
+    {
+        for (size_t j = 0; j < b.size(); j++)
+        {
+            c[i + j] += a[i] * b[j];
+        }
+    }
+    DisplayVector(c);
+}
+
 int main()
 {
+    NTTPolynomialMult();
+    NaivePolynomialMult();
+    return 0;
     srand(time(0));
     vector<int> a = vector<int>();
     int n = 16;
