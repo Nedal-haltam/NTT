@@ -123,7 +123,7 @@ vector<int> ntt_naive(vector<int>& a, int pr, int mod, bool invert = false) {
     return A;
 }
 
-vector<int> NTTMultiplynaive(vector<int>& a, vector<int>& b, int root, int mod)
+vector<int> NTTMultiply(vector<int>& a, vector<int>& b, int root, int mod)
 {
     vector<int> fa(a), fb(b);
     size_t n = 1;
@@ -139,25 +139,8 @@ vector<int> NTTMultiplynaive(vector<int>& a, vector<int>& b, int root, int mod)
     return ntt_naive(fa, root, mod, true);
 }
 
-void NTTPolynomialMult()
+vector<int> NaivePolynomialMult(vector<int>& a, vector<int>& b)
 {
-    int p = 7681;
-    int pr = 17;
-    vector<int> a = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-    vector<int> b = { 1, 2, 3, 4, 5};
-    cout << "The prime number is : " << p << "\n";
-    cout << "The primitive root is : " << pr << "\n";
-    DisplayVector(a);
-    DisplayVector(b);
-    vector<int> c = NTTMultiplynaive(a, b, pr, p);
-    cout << "The result of polynomial multiplication is : \n";
-    DisplayVector(c);
-}
-
-void NaivePolynomialMult()
-{
-    vector<int> a = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-    vector<int> b = { 1, 2, 3, 4, 5};
     vector<int> c(a.size() + b.size() - 1, 0);
     for (size_t i = 0; i < a.size(); i++)
     {
@@ -166,28 +149,56 @@ void NaivePolynomialMult()
             c[i + j] += a[i] * b[j];
         }
     }
-    DisplayVector(c);
+    return c;
 }
 
-int main()
+void TestNTT(int n, int p, int pr)
 {
-    NTTPolynomialMult();
-    NaivePolynomialMult();
-    return 0;
-    srand(time(0));
-    vector<int> a = vector<int>();
-    int n = 16;
-    int p = 7681;
-    int pr = 17;
+    vector<int> a;
     for (int i = 0; i < n; i++)
         a.push_back(i+1);
     vector<int> ntt = ntt_naive(a, pr, p);
     vector<int> intt = ntt_naive(ntt, pr, p, true);
     cout << "The prime number is : " << p << "\n";
     cout << "The primitive root is : " << pr << "\n";
+    cout << "The original vector is : \n";
     DisplayVector(a);
+    cout << "The NTT of the vector is : \n";
     DisplayVector(ntt);
+    cout << "The inverse NTT of the vector is : \n";
     DisplayVector(intt);
+}
+int main()
+{
+    srand(time(0));
+    int n = 16;
+    int p = 7681;
+    int pr = 17;
+    vector<int> a = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    vector<int> b = { 1, 2, 3, 4, 5};
+    cout << "Naive NTT Polynomial Multiplication\n";
+    cout << "The prime number is : " << p << "\n";
+    cout << "The primitive root is : " << pr << "\n";
+    cout << "The first polynomial is : \n";
+    DisplayVector(a);
+    cout << "The second polynomial is : \n";
+    DisplayVector(b);
+    cout << "The result of polynomial multiplication is : \n";
+    vector<int> c = NTTMultiply(a, b, pr, p);
+    DisplayVector(c);
+    cout << "--------------------------------\n";
+    vector<int> ValidC = NaivePolynomialMult(a, b);
+    for (size_t i = 0; i < ValidC.size(); i++)
+    {
+        if (c[i] != ValidC[i])
+        {
+            cout << "Error in NTT multiplication at index " << i << ": expected " << ValidC[i] << ", got " << c[i] << "\n";
+            cout << "The result of naive polynomial multiplication is : \n";
+            DisplayVector(ValidC);
+            return 1;
+        }
+    }
+    TestNTT(n, p, pr);
 
     return 0;
 }
